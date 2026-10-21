@@ -109,53 +109,33 @@ const inviteMember = async (req, res) => {
 // ─── GET /api/teams/invite/accept/:token ─────────────────────────────────────
 // Magic link handler — user clicks "Accept" in their email.
 const acceptInvitation = async (req, res) => {
-  try {
-    const { token } = req.params;
-
-    const invitation = await TeamInvitation.findOne({ token }).populate("team");
-    if (!invitation) {
-      return res.redirect(`${process.env.CLIENT_URL}/invite/invalid`);
-    }
-
-    if (invitation.status !== "pending") {
-      return res.redirect(
-        `${process.env.CLIENT_URL}/invite/already-${invitation.status}`,
-      );
-    }
-
-    if (invitation.expiresAt < new Date()) {
-      invitation.status = "rejected";
-      await invitation.save();
-      return res.redirect(`${process.env.CLIENT_URL}/invite/expired`);
-    }
-
-    const team = await Team.findById(invitation.team._id);
-
-    // Check if this email's user is already a member
-    const invitedUser = await User.findOne({ email: invitation.invitedEmail });
-    if (invitedUser) {
-      const alreadyMember = team.members.some(
-        (m) => m.user.toString() === invitedUser._id.toString(),
-      );
-      if (!alreadyMember) {
-        team.members.push({ user: invitedUser._id, role: "member" });
-        await team.save();
-      }
-    }
-
-    invitation.status = "accepted";
-    await invitation.save();
-
-    // Redirect to frontend — they may need to log in first
-    return res.redirect(
-      `${process.env.CLIENT_URL}/invite/accepted?team=${encodeURIComponent(team.name)}`,
-    );
-  } catch (error) {
-    console.error("acceptInvitation error:", error);
-    return res.redirect(`${process.env.CLIENT_URL}/invite/error`);
-  }
+  const { token } = req.params;
+  return res.redirect(`${process.env.CLIENT_URL}/invite/accept/${encodeURIComponent(token)}`);
 };
 
+const acceptInvitationAuthenticated = async (req, res) => {
+  try {
+    const invitation = await TeamInvitation.findOne({ token: req.params.token });
+    if (!invitation) return res.status(404).json({ success: false, message: "Invitation not found." });
+    if (invitation.status !== "pending") return res.status(400).json({ success: false, message: `This invitation has already been ${invitation.status}.` });
+    if (invitation.expiresAt < new Date()) return res.status(410).json({ success: false, message: "This invitation has expired." });
+    if (invitation.invitedEmail.toLowerCase() !== req.user.email.toLowerCase()) {
+      return res.status(403).json({ success: false, message: `Sign in with ${invitation.invitedEmail} to accept this invitation.` });
+    }
+    const team = await Team.findById(invitation.team);
+    if (!team) return res.status(404).json({ success: false, message: "The invited team no longer exists." });
+    if (!team.members.some((member) => member.user.toString() === req.user._id.toString())) {
+      team.members.push({ user: req.user._id, role: "member" });
+      await team.save();
+    }
+    invitation.status = "accepted";
+    await invitation.save();
+    return res.json({ success: true, team: { _id: team._id, name: team.name } });
+  } catch (error) {
+    console.error("acceptInvitationAuthenticated error:", error);
+    return res.status(500).json({ success: false, message: "Could not accept this invitation." });
+  }
+};
 // ─── GET /api/teams/invite/reject/:token ─────────────────────────────────────
 // Magic link handler — user clicks "Decline" in their email.
 const rejectInvitation = async (req, res) => {
@@ -281,7 +261,7 @@ async function _createAndSendInvite({ email, team, inviter }) {
     token,
   });
 
-  const acceptUrl = `${process.env.API_URL}/api/teams/invite/accept/${token}`;
+  const acceptUrl = `${process.env.CLIENT_URL}/invite/accept/${token}`;
   const rejectUrl = `${process.env.API_URL}/api/teams/invite/reject/${token}`;
 
   await sendTeamInvitationEmail({
@@ -551,6 +531,7 @@ module.exports = {
   createTeam,
   inviteMember,
   acceptInvitation,
+  acceptInvitationAuthenticated,
   rejectInvitation,
   getUserTeams,
   getTeamById,

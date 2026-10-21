@@ -15,7 +15,9 @@ export function AuthCallbackView() {
     if (token && userParam) {
       const user = JSON.parse(decodeURIComponent(userParam));
       login(token, user);
-      navigate("/dashboard");
+      const returnTo = sessionStorage.getItem("auth:returnTo");
+      sessionStorage.removeItem("auth:returnTo");
+      navigate(returnTo?.startsWith("/") ? returnTo : "/dashboard", { replace: true });
     } else {
       navigate("/login");
     }

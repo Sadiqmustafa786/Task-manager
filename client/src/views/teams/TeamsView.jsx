@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useTeamStore } from "../../stores/useTeamStore";
 import { useAuthStore } from "../../stores/useAuthStore";
 import TeamCard from "./TeamCard";
@@ -11,6 +12,8 @@ export const TeamsView = () => {
   const { teams, fetchTeams, loading, error, clearError, createTeam } =
     useTeamStore();
   const user = useAuthStore((s) => s.user);
+  const [searchParams] = useSearchParams();
+  const selectedTeamId = searchParams.get("teamId");
   const [showCreateDrawer, setShowCreateDrawer] = useState(false);
   const [creating, setCreating] = useState(false);
 
@@ -86,6 +89,7 @@ export const TeamsView = () => {
             <TeamCard
               key={team._id}
               team={team}
+              autoOpen={team._id === selectedTeamId}
               onColorUpdated={handleColorUpdated}
               onTeamUpdated={handleTeamUpdated}
             />

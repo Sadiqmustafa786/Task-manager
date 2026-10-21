@@ -7,7 +7,7 @@ import { useWorkflowStore } from "../../stores/useWorkflowStore";
 import { showSuccess, showError } from "../../components/toaster/Toaster";
 import { getIconByPath } from "../../constants/workflowIcons";
 
-const WorkflowCard = ({ workflow, isGeneral = false, onWorkflowUpdated }) => {
+const WorkflowCard = ({ workflow, isGeneral = false, onWorkflowUpdated, onUseWorkflow }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -16,8 +16,11 @@ const WorkflowCard = ({ workflow, isGeneral = false, onWorkflowUpdated }) => {
 
   // Get icon for this workflow
   const workflowIcon = workflow.defaultImage
-    ? getIconByPath(workflow.defaultImage)
-    : { path: null, color: isGeneral ? "#5A7ACD" : "#4F46E5" };
+    ? {
+        ...getIconByPath(workflow.defaultImage),
+        color: workflow.iconColor || getIconByPath(workflow.defaultImage).color,
+      }
+    : { path: null, color: workflow.iconColor || (isGeneral ? "#5A7ACD" : "#4F46E5") };
 
   const totalPhases = workflow.phases?.length || 0;
 
@@ -156,6 +159,8 @@ const WorkflowCard = ({ workflow, isGeneral = false, onWorkflowUpdated }) => {
         isOpen={showDetailModal}
         onClose={() => setShowDetailModal(false)}
         workflow={workflow}
+        isGeneral={isGeneral}
+        onUseWorkflow={onUseWorkflow ? () => onUseWorkflow(workflow) : undefined}
       />
 
       <ConfirmationDialog

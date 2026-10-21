@@ -25,6 +25,7 @@ import TaskDetailPage from "../views/tasks/TaskDetailPage";
 import IndividualStatisticsView from "../views/statistics/IndividualStatisticsView";
 import OrganizationalStatisticsView from "../views/statistics/OrganizationalStatisticsView";
 import BacklogView from "../views/backlog/BacklogView";
+import InvitationView from "../views/teams/InvitationView";
 
 export default function App() {
   const initializeSession = useAuthStore((s) => s.initializeSession);
@@ -40,6 +41,7 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<LoginView />} />
         <Route path="/auth/callback" element={<AuthCallbackView />} />
+        <Route path="/invite/accept/:token" element={<InvitationView />} />
         <Route
           path="/dashboard"
           element={

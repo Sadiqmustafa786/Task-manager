@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { teamService } from "../../services/team.service";
 import { showError, showSuccess } from "../../components/toaster/Toaster";
 import EditTeam from "./EditTeam";
@@ -7,7 +7,7 @@ import TeamDetailModal from "./TeamDetailModal";
 import { useTeamStore } from "../../stores/useTeamStore";
 import { useAuthStore } from "../../stores/useAuthStore";
 
-const TeamCard = ({ team, onColorUpdated, onTeamUpdated }) => {
+const TeamCard = ({ team, onColorUpdated, onTeamUpdated, autoOpen = false }) => {
   const teamColor = team.color || "#5A7ACD";
   const [showMenu, setShowMenu] = useState(false);
   const [showColorMenu, setShowColorMenu] = useState(false);
@@ -18,6 +18,10 @@ const TeamCard = ({ team, onColorUpdated, onTeamUpdated }) => {
   const [updating, setUpdating] = useState(false);
   const [currentColor, setCurrentColor] = useState(teamColor);
   const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    if (autoOpen) setShowDetailModal(true);
+  }, [autoOpen]);
 
   const { deleteTeam } = useTeamStore();
   const { user } = useAuthStore(); // Get current logged in user
@@ -147,7 +151,10 @@ const TeamCard = ({ team, onColorUpdated, onTeamUpdated }) => {
                 setShowMenu(!showMenu);
                 setShowColorMenu(false);
               }}
-              className="absolute p-1 text-white rounded-full top-2 right-2 hover:bg-white/20"
+              type="button"
+              aria-label={`More options for ${team.name}`}
+              aria-expanded={showMenu}
+              className="absolute p-2 text-white rounded-full top-2 right-2 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/80"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
@@ -169,7 +176,10 @@ const TeamCard = ({ team, onColorUpdated, onTeamUpdated }) => {
               />
 
               {/* Main Menu */}
-              <div className="absolute top-0 z-30 w-40 mt-2 overflow-visible bg-white border border-gray-100 rounded-lg shadow-xl left-32">
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="absolute right-0 top-11 z-30 w-40 max-w-[calc(100vw-1.5rem)] overflow-visible rounded-lg border border-gray-100 bg-white shadow-xl"
+              >
                 {/* Color Button - Opens nested menu */}
                 <div className="relative">
                   <button
@@ -178,6 +188,8 @@ const TeamCard = ({ team, onColorUpdated, onTeamUpdated }) => {
                       setShowColorMenu(!showColorMenu);
                     }}
                     className="flex items-center justify-between w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-50"
+                    type="button"
+                    aria-expanded={showColorMenu}
                   >
                     <span>Color</span>
                     <svg
@@ -197,10 +209,7 @@ const TeamCard = ({ team, onColorUpdated, onTeamUpdated }) => {
 
                   {/* Nested Color Menu */}
                   {showColorMenu && (
-                    <div
-                      className="absolute top-0 z-40 w-64 p-3 ml-2 bg-white border border-gray-100 rounded-lg shadow-xl"
-                      style={{ left: "100%" }}
-                    >
+                    <div className="absolute right-0 top-full z-40 mt-1 w-[min(16rem,calc(100vw-1.5rem))] rounded-lg border border-gray-100 bg-white p-3 shadow-xl">
                       <p className="mb-2 text-xs font-medium text-gray-500">
                         Select Color
                       </p>
@@ -217,6 +226,8 @@ const TeamCard = ({ team, onColorUpdated, onTeamUpdated }) => {
                                 ? "border-2 border-blue-500 ring-2 ring-blue-200"
                                 : "border-gray-200"
                             }`}
+                            type="button"
+                            aria-label={`Select team color ${color}`}
                             style={{ backgroundColor: color }}
                           />
                         ))}

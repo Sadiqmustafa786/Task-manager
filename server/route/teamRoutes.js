@@ -4,6 +4,7 @@ const {
   createTeam,
   inviteMember,
   acceptInvitation,
+  acceptInvitationAuthenticated,
   rejectInvitation,
   getUserTeams,
   getTeamById,
@@ -21,6 +22,7 @@ router.get("/invite/reject/:token", rejectInvitation);
 
 // ── Protected routes ─────────────────────────────────────────────────────────
 router.use(protect);
+router.post("/invitations/:token/accept", acceptInvitationAuthenticated);
 
 router.get("/", getUserTeams);
 router.post("/", createTeam);

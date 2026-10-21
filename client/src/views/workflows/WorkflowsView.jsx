@@ -31,6 +31,24 @@ export const WorkflowsView = () => {
     fetchUserWorkflows();
   };
 
+  const handleUseGeneralWorkflow = async (workflow) => {
+    try {
+      await createWorkflow({
+        name: `${workflow.name} (Copy)`,
+        phases: (workflow.phases || []).map((phase, index) => ({
+          name: phase.name,
+          order: index,
+        })),
+        defaultImage: workflow.defaultImage,
+        iconColor: workflow.iconColor,
+      });
+      showSuccess(`${workflow.name} added to My Workflows.`);
+      setActiveTab("user");
+    } catch (error) {
+      showError(error.response?.data?.message || "Failed to use this workflow");
+    }
+  };
+
   const handleCreateWorkflow = async (workflowData) => {
     try {
       setCreating(true);
@@ -126,6 +144,7 @@ export const WorkflowsView = () => {
                 key={workflow._id}
                 workflow={workflow}
                 isGeneral={true}
+                onUseWorkflow={handleUseGeneralWorkflow}
               />
             ))}
         </div>
@@ -133,7 +152,14 @@ export const WorkflowsView = () => {
         {/* No Workflows Message */}
         {activeTab === "user" && userWorkflows.length === 0 && !loading && (
           <div className="mt-8 text-center text-gray-500">
-            <p>Click "Add New Workflow" to create your first workflow</p>
+            <p>You have not created a workflow yet. Start with a ready-made template or create your own.</p>
+            <button
+              type="button"
+              onClick={() => setActiveTab("general")}
+              className="mt-3 text-sm font-medium text-blue-600 hover:text-blue-700"
+            >
+              Browse default workflows
+            </button>
           </div>
         )}
       </div>

@@ -6,22 +6,23 @@ const useProjectStore = create((set) => ({
   projects: [],
   currentProject: null,
   formData: { workflows: [], users: [] },
+  formDataLoading: false,
   loading: false,
   error: null,
 
   fetchFormData: async () => {
-    set({ loading: true, error: null });
+    set({ formDataLoading: true, error: null });
     try {
       const response = await projectService.getProjectFormData();
       set({
         formData: { workflows: response.workflows, users: response.users },
-        loading: false,
+        formDataLoading: false,
       });
       return response;
     } catch (error) {
       set({
         error: error.response?.data?.message || "Failed to fetch form data",
-        loading: false,
+        formDataLoading: false,
       });
       throw error;
     }

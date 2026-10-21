@@ -5,6 +5,9 @@ import { useAuthStore } from "../stores/useAuthStore";
 import { useTeamStore } from "../stores/useTeamStore";
 import { TbMailForward } from "react-icons/tb";
 import { FiCheck, FiX, FiMenu, FiXCircle } from "react-icons/fi";
+import defaultAvatar from "../assets/DP.jpg";
+import taskoraLogo from "../assets/taskora-icon.png";
+import "./Navbar.css";
 
 const Navbar = () => {
   const { logout, user } = useAuthStore();
@@ -77,51 +80,97 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-white border-b shadow-md">
-      <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+    <nav className="navbar-root sticky top-0 z-50">
+      <div className="navbar-shell mx-auto">
+        <svg
+          className="navbar-wave"
+          viewBox="0 0 800 100"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <defs>
+            <linearGradient
+              id="navbar-blue-gradient"
+              x1="0"
+              y1="0"
+              x2="1"
+              y2="1"
+            >
+              <stop offset="0%" stopColor="#2391FF" />
+              <stop offset="100%" stopColor="#1269C7" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M470 0C390 4 350 56 285 78C220 100 170 72 0 100H800V0H470Z"
+            fill="#1675D1"
+            transform="translate(0 -5)"
+          >
+            <animate
+              attributeName="d"
+              dur="7s"
+              repeatCount="indefinite"
+              values="M470 0C390 4 350 56 285 78C220 100 170 72 0 100H800V0H470Z;M470 0C390 24 350 36 285 64C220 94 170 91 0 100H800V0H470Z;M470 0C390 -8 350 72 285 88C220 104 170 58 0 100H800V0H470Z;M470 0C390 4 350 56 285 78C220 100 170 72 0 100H800V0H470Z"
+              keyTimes="0;0.34;0.68;1"
+              calcMode="spline"
+              keySplines="0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1"
+            />
+          </path>
+          <path
+            d="M470 0C390 4 350 56 285 78C220 100 170 72 0 100H800V0H470Z"
+            fill="url(#navbar-blue-gradient)"
+          >
+            <animate
+              attributeName="d"
+              dur="8.5s"
+              repeatCount="indefinite"
+              values="M470 0C390 4 350 56 285 78C220 100 170 72 0 100H800V0H470Z;M470 0C390 -5 350 69 285 88C220 106 170 61 0 100H800V0H470Z;M470 0C390 21 350 40 285 66C220 94 170 90 0 100H800V0H470Z;M470 0C390 4 350 56 285 78C220 100 170 72 0 100H800V0H470Z"
+              keyTimes="0;0.34;0.68;1"
+              calcMode="spline"
+              keySplines="0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1"
+            />
+          </path>
+        </svg>
+        <div className="navbar-content flex items-center justify-between">
           {/* Left Section - Logo */}
           <div className="flex items-center">
-            <Link to="/dashboard" className="flex items-center gap-2">
-              <div className="flex items-center justify-center w-8 h-8 text-white rounded-lg bg-gradient-to-r from-blue-500 to-blue-600">
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                </svg>
-              </div>
-              <span className="text-xl font-bold text-gray-800">Auth App</span>
+            <Link to="/dashboard" className="flex items-center gap-3">
+              <img
+                src={taskoraLogo}
+                alt="Taskora"
+                className="h-11 w-11 object-contain"
+              />
+              <span className="navbar-brand text-xl font-bold text-gray-800">
+                Taskora
+              </span>
             </Link>
           </div>
 
           {/* Desktop Navigation - Center */}
-          <div className="items-center hidden gap-1 md:flex">
+          <div className="navbar-links items-center hidden gap-1 md:flex">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 to={link.path}
-                className={`relative px-4 py-2 text-sm font-medium transition-all duration-200 rounded-lg ${
+                className={`navbar-link relative px-4 py-3 text-sm font-medium transition-all duration-200 ${
                   isActiveLink(link.path)
-                    ? "text-blue-600 bg-blue-50"
-                    : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+                    ? "text-[#2391FF]"
+                    : "text-gray-700 hover:text-[#2391FF]"
                 }`}
               >
                 {link.name}
                 {isActiveLink(link.path) && (
-                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-full"></span>
+                  <span className="navbar-active-indicator absolute bottom-0 left-1/2 h-1 w-10 -translate-x-1/2 rounded-full bg-[#2391FF]"></span>
                 )}
               </Link>
             ))}
           </div>
 
           {/* Right Section */}
-          <div className="flex items-center gap-2">
+          <div className="navbar-actions relative flex items-center gap-2">
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-gray-600 transition rounded-lg hover:bg-blue-50 hover:text-blue-600 md:hidden"
+              className="navbar-icon-button p-2 text-white transition rounded-full hover:bg-white/15 md:hidden"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? (
@@ -135,7 +184,7 @@ const Navbar = () => {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setInvitationOpen(!invitationOpen)}
-                className="relative p-2 text-gray-600 transition rounded-full hover:text-blue-600 hover:bg-blue-50"
+                className="navbar-icon-button relative p-2 text-white transition rounded-full hover:bg-white/15"
                 aria-label="Invitations"
               >
                 <TbMailForward className="w-5 h-5" />
@@ -149,7 +198,7 @@ const Navbar = () => {
               {/* Invitation Dropdown Menu */}
               {invitationOpen && (
                 <div className="absolute right-0 z-50 mt-2 overflow-hidden bg-white border border-gray-200 rounded-lg shadow-xl w-80 top-full">
-                  <div className="px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600">
+                  <div className="px-4 py-3 bg-gradient-to-r from-[#2391FF] to-blue-700">
                     <h3 className="font-semibold text-white">Invitations</h3>
                     <p className="text-xs text-blue-100">
                       Team invitations waiting for you
@@ -159,7 +208,7 @@ const Navbar = () => {
                   <div className="overflow-y-auto max-h-96">
                     {loading ? (
                       <div className="flex items-center justify-center py-8">
-                        <div className="w-6 h-6 border-b-2 border-blue-600 rounded-full animate-spin"></div>
+                        <div className="w-6 h-6 border-b-2 border-[#2391FF] rounded-full animate-spin"></div>
                       </div>
                     ) : !invitations || invitations.length === 0 ? (
                       <div className="py-8 text-center">
@@ -248,17 +297,19 @@ const Navbar = () => {
             {/* User Info */}
             <div
               onClick={() => setOpen(!open)}
-              className="flex items-center gap-2 px-2 py-1 transition rounded-lg cursor-pointer hover:bg-blue-50"
+              className="navbar-user flex items-center gap-2 px-2 py-1 transition rounded-full cursor-pointer hover:bg-white/15"
             >
               <img
-                src={
-                  user?.avatar ||
-                  `https://ui-avatars.com/api/?name=${user?.name || "User"}`
-                }
-                alt="avatar"
+                src={user?.avatar || defaultAvatar}
+                alt={`${user?.name || "User"}'s profile`}
+                referrerPolicy="no-referrer"
+                onError={(event) => {
+                  event.currentTarget.onerror = null;
+                  event.currentTarget.src = defaultAvatar;
+                }}
                 className="object-cover w-8 h-8 border rounded-full"
               />
-              <span className="hidden text-sm font-medium text-gray-700 sm:block">
+              <span className="hidden text-sm font-medium text-white sm:block">
                 {user?.name || "User"}
               </span>
             </div>
@@ -272,26 +323,6 @@ const Navbar = () => {
                     {user?.email}
                   </p>
                 </div>
-                <Link
-                  to="/profile"
-                  onClick={() => setOpen(false)}
-                  className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 transition hover:bg-blue-50"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    />
-                  </svg>
-                  Profile
-                </Link>
                 <button
                   onClick={() => {
                     setOpen(false);
@@ -320,15 +351,12 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu - with light blue-green background when open */}
+      {/* Mobile Menu */}
       <div
         ref={mobileMenuRef}
-        className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${
+        className={`navbar-mobile-menu mx-auto md:hidden transition-all duration-300 ease-in-out overflow-hidden ${
           mobileMenuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
         }`}
-        style={{
-          backgroundColor: mobileMenuOpen ? "#e6f7f5" : "transparent",
-        }}
       >
         <div className="px-4 py-4 space-y-1 border-t">
           {navLinks.map((link) => (
@@ -337,14 +365,14 @@ const Navbar = () => {
               to={link.path}
               className={`block px-4 py-3 text-base font-medium transition-all duration-200 rounded-lg ${
                 isActiveLink(link.path)
-                  ? "text-blue-700 bg-white shadow-sm border-l-4 border-blue-500"
-                  : "text-gray-700 hover:text-blue-600 hover:bg-white/70"
+                  ? "text-[#2391FF] bg-white shadow-sm border-l-4 border-[#2391FF]"
+                  : "text-gray-700 hover:text-[#2391FF] hover:bg-white/70"
               }`}
             >
               <span className="flex items-center gap-3">
                 <span className="flex-1">{link.name}</span>
                 {isActiveLink(link.path) && (
-                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+                  <span className="w-1.5 h-1.5 bg-[#2391FF] rounded-full"></span>
                 )}
               </span>
             </Link>
@@ -356,11 +384,13 @@ const Navbar = () => {
           {/* Mobile User Info */}
           <div className="flex items-center gap-3 px-4 py-3">
             <img
-              src={
-                user?.avatar ||
-                `https://ui-avatars.com/api/?name=${user?.name || "User"}`
-              }
-              alt="avatar"
+              src={user?.avatar || defaultAvatar}
+              alt={`${user?.name || "User"}'s profile`}
+              referrerPolicy="no-referrer"
+              onError={(event) => {
+                event.currentTarget.onerror = null;
+                event.currentTarget.src = defaultAvatar;
+              }}
               className="object-cover w-8 h-8 border rounded-full"
             />
             <div className="flex-1">

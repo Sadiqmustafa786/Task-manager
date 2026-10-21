@@ -31,6 +31,11 @@ export const teamService = {
     return data;
   },
 
+  acceptInvitation: async (token) => {
+    const { data } = await http.post(`/teams/invitations/${token}/accept`);
+    return data;
+  },
+
   getTeamById: async (teamId) => {
     const { data } = await http.get(`/teams/${teamId}`);
     return data;

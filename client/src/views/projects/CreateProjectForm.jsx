@@ -1,5 +1,5 @@
 // views/projects/CreateProjectForm.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import CustomModal from "../../components/CustomModal";
 import { useProjectStore } from "../../stores/useProjectStore";
 import { useWorkflowStore } from "../../stores/useWorkflowStore";
@@ -23,6 +23,9 @@ const CreateProjectForm = ({ isOpen, onClose, onSubmit, loading }) => {
   });
 
   const { formData: formOptions, fetchFormData } = useProjectStore();
+  const [optionsLoading, setOptionsLoading] = useState(false);
+  const [optionsError, setOptionsError] = useState("");
+  const optionsRequestStarted = useRef(false);
   const {
     fetchUserWorkflows,
     userWorkflows,
@@ -30,13 +33,31 @@ const CreateProjectForm = ({ isOpen, onClose, onSubmit, loading }) => {
     generalWorkflows,
   } = useWorkflowStore();
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchFormData();
-      fetchUserWorkflows();
-      fetchGeneralWorkflows();
+  const loadFormOptions = useCallback(async () => {
+    if (optionsRequestStarted.current) return;
+    optionsRequestStarted.current = true;
+    setOptionsLoading(true);
+    setOptionsError("");
+    try {
+      await Promise.all([
+        fetchFormData(),
+        fetchUserWorkflows(),
+        fetchGeneralWorkflows(),
+      ]);
+    } catch (error) {
+      optionsRequestStarted.current = false;
+      const message = error.response?.data?.message || "Could not load project form data. Please try again.";
+      setOptionsError(message);
+      showError(message);
+    } finally {
+      setOptionsLoading(false);
     }
-  }, [isOpen]);
+  }, [fetchFormData, fetchUserWorkflows, fetchGeneralWorkflows]);
+
+  useEffect(() => {
+    if (isOpen) loadFormOptions();
+    else optionsRequestStarted.current = false;
+  }, [isOpen, loadFormOptions]);
 
   useEffect(() => {
     if (isOpen) {
@@ -316,7 +337,25 @@ const CreateProjectForm = ({ isOpen, onClose, onSubmit, loading }) => {
             <h2 className="mb-2 text-sm font-semibold text-gray-800">
               Select Workflow
             </h2>
+            {optionsError && (
+              <div className="mb-2 rounded-md bg-red-50 p-2 text-xs text-red-700">
+                {optionsError}
+                <button
+                  type="button"
+                  onClick={() => {
+                    optionsRequestStarted.current = false;
+                    loadFormOptions();
+                  }}
+                  className="ml-1 font-semibold underline"
+                >
+                  Retry
+                </button>
+              </div>
+            )}
             <div className="space-y-2 max-h-[calc(100vh-180px)] overflow-y-auto">
+              {optionsLoading && allWorkflows.length === 0 && (
+                <p className="py-4 text-center text-sm text-gray-500">Loading project form data...</p>
+              )}
               {allWorkflows.map((workflow) => {
                 const workflowIcon = workflow.defaultImage
                   ? getIconByPath(workflow.defaultImage)
@@ -373,7 +412,7 @@ const CreateProjectForm = ({ isOpen, onClose, onSubmit, loading }) => {
                   </div>
                 );
               })}
-              {allWorkflows.length === 0 && (
+              {allWorkflows.length === 0 && !optionsLoading && !optionsError && (
                 <div className="py-6 text-center">
                   <p className="text-sm text-gray-500">
                     No workflows available

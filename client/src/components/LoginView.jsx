@@ -1,9 +1,15 @@
 import React from "react";
+import { useLocation } from "react-router-dom";
 import { GoogleIcon } from "./GoogleIcon";
 import { getGoogleOAuthUrl } from "../services/auth.service";
 
 export function LoginView() {
+  const location = useLocation();
   const handleGoogleLogin = () => {
+    const returnTo = new URLSearchParams(location.search).get("returnTo");
+    if (returnTo?.startsWith("/")) {
+      sessionStorage.setItem("auth:returnTo", returnTo);
+    }
     window.location.href = getGoogleOAuthUrl();
   };
 

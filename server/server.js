@@ -7,6 +7,7 @@ const passport = require("passport");
 require("dotenv").config();
 
 const connectDB = require("./config/db");
+const seedDefaultWorkflows = require("./config/seedDefaultWorkflows");
 const authRoutes = require("./route/authRoutes");
 const teamRoutes = require("./route/Teamroutes");
 const workflowRoutes = require("./route/workflowRoutes");
@@ -19,13 +20,25 @@ const backlogRoutes = require("./route/backlogRoutes");
 // Initialize express
 const app = express();
 
-// Connect Database
-connectDB();
+// Database connection and default workflow seeding run before the server starts.
 
 // Middleware
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin: (origin, callback) => {
+      const allowedOrigins = [process.env.CLIENT_URL];
+      if (process.env.NODE_ENV !== "production") {
+        allowedOrigins.push(
+          "http://localhost:5173",
+          "http://127.0.0.1:5173",
+        );
+      }
+
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Origin is not allowed by CORS"));
+    },
     credentials: true,
   }),
 );
@@ -69,8 +82,15 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, message: "Something went wrong!" });
 });
 
-// Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+connectDB()
+  .then(seedDefaultWorkflows)
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error("Server startup failed:", error);
+    process.exit(1);
+  });

@@ -3,13 +3,16 @@ import React from "react";
 import CustomModal from "../../components/CustomModal";
 import { getIconByPath } from "../../constants/workflowIcons";
 
-const WorkflowDetailModal = ({ isOpen, onClose, workflow }) => {
+const WorkflowDetailModal = ({ isOpen, onClose, workflow, isGeneral = false, onUseWorkflow }) => {
   if (!isOpen || !workflow) return null;
 
   const totalPhases = workflow.phases?.length || 0;
   const workflowIcon = workflow.defaultImage
-    ? getIconByPath(workflow.defaultImage)
-    : { path: null, color: "#4F46E5" };
+    ? {
+        ...getIconByPath(workflow.defaultImage),
+        color: workflow.iconColor || getIconByPath(workflow.defaultImage).color,
+      }
+    : { path: null, color: workflow.iconColor || "#4F46E5" };
 
   // Sort phases by order
   const sortedPhases = [...(workflow.phases || [])].sort(
@@ -24,7 +27,15 @@ const WorkflowDetailModal = ({ isOpen, onClose, workflow }) => {
       size="lg"
       showFooter={true}
       footerContent={
-        <div className="flex justify-end">
+        <div className="flex justify-between gap-3">
+          {isGeneral && onUseWorkflow && (
+            <button
+              onClick={onUseWorkflow}
+              className="px-4 py-2 text-sm font-medium text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700"
+            >
+              Use This Workflow
+            </button>
+          )}
           <button
             onClick={onClose}
             className="px-4 py-2 text-sm text-gray-700 transition-colors bg-gray-100 rounded-md hover:bg-gray-200"
